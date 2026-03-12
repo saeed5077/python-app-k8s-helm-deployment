@@ -1,0 +1,27 @@
+# Git
+.git
+.gitignore
+
+# Python Cache and Compiled Files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local Virtual Environments (CRITICAL)
+venv/
+.venv/
+env/
+.env/
+
+# Environment Variables (Keep secrets out of the image!)
+.env
+.env.local
+
+# Docker files (No need to copy them into the container)
+Dockerfile
+.dockerignore
+
+# Testing and Coverage
+.pytest_cache/
+.coverage
+htmlcov/
