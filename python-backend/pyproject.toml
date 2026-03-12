@@ -1,0 +1,14 @@
+[project]
+name = "python-app-deployment-devops"
+version = "0.1.0"
+description = "This app is a part of Helm stack, that depicts how a Helm combines a complete stack"
+requires-python = ">=3.13"
+dependencies = [
+    "aiosqlite>=0.21.0",
+    "fastapi>=0.121.0",
+    "greenlet>=3.2.4",
+    "prometheus-client>=0.23.1",
+    "pydantic>=2.12.3",
+    "sqlalchemy>=2.0.44",
+    "uvicorn>=0.38.0",
+]
