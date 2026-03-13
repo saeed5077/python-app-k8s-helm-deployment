@@ -1,35 +1,69 @@
-1. Get the application URL by running these commands:
-{{- if .Values.httpRoute.enabled }}
-{{- if .Values.httpRoute.hostnames }}
-    export APP_HOSTNAME={{ .Values.httpRoute.hostnames | first }}
-{{- else }}
-    export APP_HOSTNAME=$(kubectl get --namespace {{(first .Values.httpRoute.parentRefs).namespace | default .Release.Namespace }} gateway/{{ (first .Values.httpRoute.parentRefs).name }} -o jsonpath="{.spec.listeners[0].hostname}")
-  {{- end }}
-{{- if and .Values.httpRoute.rules (first .Values.httpRoute.rules).matches (first (first .Values.httpRoute.rules).matches).path.value }}
-    echo "Visit http://$APP_HOSTNAME{{ (first (first .Values.httpRoute.rules).matches).path.value }} to use your application"
+Thank you for installing {{ .Chart.Name }} (version {{ .Chart.Version }}).
 
-    NOTE: Your HTTPRoute depends on the listener configuration of your gateway and your HTTPRoute rules.
-    The rules can be set for path, method, header and query parameters.
-    You can check the gateway configuration with 'kubectl get --namespace {{(first .Values.httpRoute.parentRefs).namespace | default .Release.Namespace }} gateway/{{ (first .Values.httpRoute.parentRefs).name }} -o yaml'
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Release : {{ .Release.Name }}
+  Namespace: {{ .Release.Namespace }}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+── FastAPI ────────────────────────────────────────────────
+  Service : {{ include "python-backend.fastapiName" . }}
+  Port    : {{ .Values.fastapi.port | default 8000 }}
+  Replicas: {{ .Values.fastapi.replicas | default 1 }}
+
+  Access via Ingress:
+    http://localhost/
+
+  Available routes:
+    {{- range .Values.ingress.paths }}
+    → http://localhost{{ .path }}
+    {{- end }}
+
+── Grafana ────────────────────────────────────────────────
+{{- if .Values.grafana.enabled }}
+  URL     : http://localhost{{ .Values.ingress.grafana.path }}
+  User    : {{ .Values.grafana.adminUser }}
+  Password: {{ .Values.grafana.adminPassword }}
+{{- else }}
+  Grafana is disabled. Set grafana.enabled=true to enable.
 {{- end }}
-{{- else if .Values.ingress.enabled }}
-{{- range $host := .Values.ingress.hosts }}
-  {{- range .paths }}
-  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+
+── PostgreSQL ─────────────────────────────────────────────
+{{- if .Values.postgresql.enabled }}
+  Host    : {{ include "python-backend.postgresqlName" . }}
+  Port    : 5432
+  Database: {{ .Values.postgresql.auth.database }}
+  User    : {{ .Values.postgresql.auth.username }}
+{{- else }}
+  PostgreSQL is disabled. Set postgresql.enabled=true to enable.
+{{- end }}
+
+── Prometheus ─────────────────────────────────────────────
+{{- if .Values.prometheus.enabled }}
+  Server  : {{ include "python-backend.prometheusName" . }}
+  Scrape  : every 15s (prometheus.io/scrape annotations active)
+{{- else }}
+  Prometheus is disabled. Set prometheus.enabled=true to enable.
+{{- end }}
+
+── HPA ────────────────────────────────────────────────────
+{{- if .Values.autoscaling.enabled }}
+  Autoscaling : ENABLED
+  Min replicas: {{ .Values.autoscaling.minReplicas | default 1 }}
+  Max replicas: {{ .Values.autoscaling.maxReplicas | default 5 }}
+  {{- if .Values.autoscaling.targetCPUUtilizationPercentage }}
+  CPU target  : {{ .Values.autoscaling.targetCPUUtilizationPercentage }}%
   {{- end }}
+  {{- if .Values.autoscaling.targetMemoryUtilizationPercentage }}
+  Memory target: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}%
+  {{- end }}
+{{- else }}
+  Autoscaling : disabled (set autoscaling.enabled=true to enable)
 {{- end }}
-{{- else if contains "NodePort" .Values.service.type }}
-  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "python-chart.fullname" . }})
-  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
-  echo http://$NODE_IP:$NODE_PORT
-{{- else if contains "LoadBalancer" .Values.service.type }}
-     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
-           You can watch its status by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "python-chart.fullname" . }}'
-  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "python-chart.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
-  echo http://$SERVICE_IP:{{ .Values.service.port }}
-{{- else if contains "ClusterIP" .Values.service.type }}
-  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "python-chart.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
-  export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
-  echo "Visit http://127.0.0.1:8080 to use your application"
-  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
-{{- end }}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Verify all pods are running:
+    kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+  Check logs:
+    kubectl logs -n {{ .Release.Namespace }} deploy/{{ include "python-backend.fastapiName" . }}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

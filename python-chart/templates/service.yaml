@@ -1,15 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "python-chart.fullname" . }}
+  name: {{ include "python-backend.fastapiName" . }}
   labels:
-    {{- include "python-chart.labels" . | nindent 4 }}
+    {{- include "python-backend.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.service.type }}
+  type: ClusterIP
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
-      protocol: TCP
-      name: http
+    - port: {{ .Values.fastapi.port }}
+      targetPort: {{ .Values.fastapi.port }}
   selector:
-    {{- include "python-chart.selectorLabels" . | nindent 4 }}
+    {{- include "python-backend.selectorLabels" . | nindent 4 }}

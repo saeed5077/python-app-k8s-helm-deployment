@@ -1,62 +1,44 @@
-{{/*
-Expand the name of the chart.
-*/}}
-{{- define "python-chart.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- define "python-backend.name" -}}
+{{- .Chart.Name | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
-{{/*
-Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-If release name contains chart name it will be used as a full name.
-*/}}
-{{- define "python-chart.fullname" -}}
-{{- if .Values.fullnameOverride }}
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
-{{- else }}
-{{- $name := default .Chart.Name .Values.nameOverride }}
-{{- if contains $name .Release.Name }}
-{{- .Release.Name | trunc 63 | trimSuffix "-" }}
-{{- else }}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
-{{- end }}
-{{- end }}
+{{- define "python-backend.fullname" -}}
+{{- printf "%s-%s" .Release.Name .Chart.Name | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
-{{/*
-Create chart name and version as used by the chart label.
-*/}}
-{{- define "python-chart.chart" -}}
-{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
-{{- end }}
-
-{{/*
-Common labels
-*/}}
-{{- define "python-chart.labels" -}}
-helm.sh/chart: {{ include "python-chart.chart" . }}
-{{ include "python-chart.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
+{{- define "python-backend.labels" -}}
+helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+app.kubernetes.io/name: {{ include "python-backend.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
-{{/*
-Selector labels
-*/}}
-{{- define "python-chart.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "python-chart.name" . }}
+{{- define "python-backend.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "python-backend.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "python-chart.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
-{{- default (include "python-chart.fullname" .) .Values.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.serviceAccount.name }}
+{{- define "python-backend.fastapiName" -}}
+{{- printf "%s-fastapi" .Release.Name }}
 {{- end }}
+
+{{- define "python-backend.postgresqlName" -}}
+{{- printf "%s-postgresql" .Release.Name }}
+{{- end }}
+
+{{- define "python-backend.grafanaName" -}}
+{{- printf "%s-grafana" .Release.Name }}
+{{- end }}
+
+{{- define "python-backend.prometheusName" -}}
+{{- printf "%s-prometheus-server" .Release.Name }}
+{{- end }}
+
+{{- define "python-backend.databaseUrl" -}}
+{{- printf "postgresql+asyncpg://%s:%s@%s:5432/%s"
+    .Values.postgresql.auth.username
+    .Values.postgresql.auth.password
+    (include "python-backend.postgresqlName" .)
+    .Values.postgresql.auth.database }}
 {{- end }}

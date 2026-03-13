@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-creation-dashboard
+  labels:
+    {{- include "python-backend.labels" . | nindent 4 }}
+    grafana_dashboard: "1"
+data:
+  creation-rates.json: |
+    {
+      "uid": {{ .Values.dashboard.uid | quote }},
+      "title": {{ .Values.dashboard.title | quote }},
+      "panels": [
+        {
+          "title": "Creation Rate",
+          "type": "graph",
+          "datasource": {{ .Values.dashboard.datasource | quote }},
+          "targets": [
+            { "expr": "rate(users_created_total[5m])", "legendFormat": "Users/sec" },
+            { "expr": "rate(posts_created_total[5m])", "legendFormat": "Posts/sec" }
+          ]
+        }
+      ]
+    }
+# ```
+
+# ---
+
+# ## 🎯 The 3 Golden Rules Summary
+# ```
+# _helpers.tpl  →  Names, labels, complex strings (built from multiple values)
+# values.yaml   →  Anything that changes per environment or deployment
+# Hardcoded     →  K8s API structure, pathType: Prefix, protocol names

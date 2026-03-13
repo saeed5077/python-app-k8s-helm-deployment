@@ -1,0 +1,12 @@
+dependencies:
+- name: postgresql
+  repository: https://charts.bitnami.com/bitnami
+  version: 13.4.4
+- name: prometheus
+  repository: https://prometheus-community.github.io/helm-charts
+  version: 25.30.2
+- name: grafana
+  repository: https://grafana.github.io/helm-charts
+  version: 7.3.12
+digest: sha256:a14440119fc531e5685a19ae673798c99cf6207a3a4c6d311c072969506f1aed
+generated: "2026-03-13T22:47:07.3089273+05:30"
