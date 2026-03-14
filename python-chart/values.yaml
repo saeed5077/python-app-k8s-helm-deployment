@@ -82,9 +82,9 @@ prometheus:
         memory: "1Gi"
   alertmanager:
     enabled: false
-  nodeExporter:
-    enabled: true
-  pushgateway:
+  prometheus-node-exporter:
+    enabled: false
+  prometheus-pushgateway:
     enabled: false
 
 # ============================================================
