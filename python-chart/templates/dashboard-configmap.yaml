@@ -22,12 +22,3 @@ data:
         }
       ]
     }
-# ```
-
-# ---
-
-# ## 🎯 The 3 Golden Rules Summary
-# ```
-# _helpers.tpl  →  Names, labels, complex strings (built from multiple values)
-# values.yaml   →  Anything that changes per environment or deployment
-# Hardcoded     →  K8s API structure, pathType: Prefix, protocol names
