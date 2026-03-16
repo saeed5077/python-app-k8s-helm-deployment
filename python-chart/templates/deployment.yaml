@@ -18,7 +18,6 @@ spec:
         prometheus.io/port: {{ .Values.fastapi.port | quote }}
         prometheus.io/path: {{ .Values.fastapi.metrics.path | quote }}
     spec:
-      {{- if .Values.fastapi.initContainer.enabled }}
       initContainers:
         - name: wait-for-postgres
           image: busybox:1.28
@@ -30,23 +29,22 @@ spec:
                 echo "Waiting for Postgres..."
                 sleep 2
               done
-      {{- end }}
       containers:
         - name: fastapi
           image: {{ .Values.fastapi.image }}
           ports:
             - containerPort: {{ .Values.fastapi.port }}
           env:
-           - name: DB_PASSWORD
-         {{- if .Values.postgresql.auth.existingSecret }}
+            - name: DB_PASSWORD
+              {{- if .Values.postgresql.auth.existingSecret }}
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.postgresql.auth.existingSecret }}
                   key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey | quote }}
-         {{- else }}
+              {{- else }}
               value: {{ .Values.postgresql.auth.password | quote }}
-         {{- end }}
-           - name: DATABASE_URL
-             value: {{ include "python-backend.databaseUrl" . | quote }}
+              {{- end }}
+            - name: DATABASE_URL
+              value: {{ include "python-backend.databaseUrl" . | quote }}
           resources:
             {{- toYaml .Values.fastapi.resources | nindent 12 }}

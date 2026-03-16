@@ -47,12 +47,12 @@ postgresql:
     pullPolicy: Always  
   auth:
     username: app_user
-    password: app_password
+    # password: app_password
     database: app_db
     #If you have stored you Secret in K8S secrets.
-    # existingSecret: ""           # Name of the secret (e.g., "my-db-secret")
-    # secretKeys:
-    #   userPasswordKey: "password"
+    existingSecret: "my-db-secret"           # Name of the secret (e.g., "my-db-secret")
+    secretKeys:
+      userPasswordKey: "postgres-password"
   primary:
     persistence:
       enabled: true
