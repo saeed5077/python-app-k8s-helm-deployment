@@ -21,7 +21,7 @@ spec:
       {{- if .Values.fastapi.initContainer.enabled }}
       initContainers:
         - name: wait-for-postgres
-          image: {{ .Values.fastapi.initContainer.image }}
+          image: busybox:1.28
           command:
             - sh
             - -c
@@ -37,7 +37,16 @@ spec:
           ports:
             - containerPort: {{ .Values.fastapi.port }}
           env:
-            - name: DATABASE_URL
-              value: {{ include "python-backend.databaseUrl" . | quote }}
+           - name: DB_PASSWORD
+         {{- if .Values.postgresql.auth.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.postgresql.auth.existingSecret }}
+                  key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey | quote }}
+         {{- else }}
+              value: {{ .Values.postgresql.auth.password | quote }}
+         {{- end }}
+           - name: DATABASE_URL
+             value: {{ include "python-backend.databaseUrl" . | quote }}
           resources:
             {{- toYaml .Values.fastapi.resources | nindent 12 }}

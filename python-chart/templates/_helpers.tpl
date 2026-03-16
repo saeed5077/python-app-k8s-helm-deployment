@@ -36,9 +36,8 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{- define "python-backend.databaseUrl" -}}
-{{- printf "postgresql+asyncpg://%s:%s@%s:5432/%s"
+{{- printf "postgresql+asyncpg://%s:$(DB_PASSWORD)@%s:5432/%s"
     .Values.postgresql.auth.username
-    .Values.postgresql.auth.password
     (include "python-backend.postgresqlName" .)
     .Values.postgresql.auth.database }}
 {{- end }}

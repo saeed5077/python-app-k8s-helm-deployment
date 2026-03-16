@@ -8,9 +8,6 @@ fastapi:
   metrics:
     path: "/metrics"
   
-  initContainer:
-    enabled: true              # ← toggle this
-    image: "busybox:1.28"      # pinnable version
   resources:
     requests:
       cpu: "100m"
@@ -52,6 +49,10 @@ postgresql:
     username: app_user
     password: app_password
     database: app_db
+    #If you have stored you Secret in K8S secrets.
+    # existingSecret: ""           # Name of the secret (e.g., "my-db-secret")
+    # secretKeys:
+    #   userPasswordKey: "password"
   primary:
     persistence:
       enabled: true
