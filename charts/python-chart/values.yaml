@@ -2,7 +2,7 @@
 # FastAPI
 # ============================================================
 fastapi:
-  image: "wiki-service:local"
+  image: "saeed2411/wiki-service:latest" #place your image-name here after importing
   replicas: 1
   port: 8000
   metrics:
@@ -47,12 +47,12 @@ postgresql:
     pullPolicy: Always  
   auth:
     username: app_user
-    # password: app_password
+    password: app_password
     database: app_db
     #If you have stored you Secret in K8S secrets.
-    existingSecret: "my-db-secret"           # Name of the secret (e.g., "my-db-secret")
-    secretKeys:
-      userPasswordKey: "postgres-password"
+    # existingSecret: "my-db-secret"           # Name of the secret (e.g., "my-db-secret")
+    # secretKeys:
+    #   userPasswordKey: "postgres-password"
   primary:
     persistence:
       enabled: true
